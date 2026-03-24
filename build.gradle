@@ -1,15 +1,39 @@
 plugins {
     id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'de.bund.zrb'
 version = '1.0-SNAPSHOT'
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
 repositories {
     mavenCentral()
 }
 
+javafx {
+    version = '21.0.2'
+    modules = ['javafx.controls', 'javafx.web', 'javafx.swing']
+}
+
 dependencies {
+    // Mermaid rendering engine (pure Java, GraalJS + Batik)
+    implementation 'com.aresstack:mermaid-java:0.1.0-beta.1'
+
+    // Rich text editor with syntax highlighting
+    implementation 'org.fxmisc.richtext:richtextfx:0.11.3'
+
+    // JSON serialization for document persistence
+    implementation 'com.google.code.gson:gson:2.11.0'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -17,4 +41,16 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+application {
+    mainClass = 'de.bund.zrb.MermaidDesignerApp'
+}
+
+// Ensure JavaFX modules are accessible in non-modular mode
+run {
+    jvmArgs += [
+        '--add-opens', 'javafx.graphics/javafx.scene=ALL-UNNAMED',
+        '--add-opens', 'javafx.controls/javafx.scene.control=ALL-UNNAMED'
+    ]
 }
