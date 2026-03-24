@@ -7,9 +7,14 @@ plugins {
 group = 'de.bund.zrb'
 version = '1.0-SNAPSHOT'
 
+// ── Java Toolchain: ensures compile + run BOTH use JDK 21 ─────────────
+// Gradle auto-detects installed JDKs and picks the right one.
+// This forces ALL tasks (compileJava, run, test) to use JDK 21,
+// regardless of which JVM the Gradle daemon itself runs on.
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 compileJava.options.encoding = 'UTF-8'
