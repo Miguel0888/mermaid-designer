@@ -49,7 +49,9 @@ test {
 }
 
 application {
-    mainClass = 'de.bund.zrb.MermaidDesignerApp'
+    // Use Launcher (not MermaidDesignerApp) to bypass the JVM's
+    // JavaFX module-path check that fails on the classpath.
+    mainClass = 'de.bund.zrb.Launcher'
 }
 
 // Ensure JavaFX modules are accessible in non-modular mode
