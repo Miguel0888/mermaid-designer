@@ -1,0 +1,88 @@
+/*
+ * Mermaid Designer — Code Editor Syntax Highlighting
+ * Used by RichTextFX CodeArea
+ */
+
+.mermaid-code-area {
+    -fx-font-family: "Consolas", "Fira Code", "Source Code Pro", monospace;
+    -fx-font-size: 14px;
+    -fx-background-color: #1e1e2e;
+}
+
+.mermaid-code-area .text {
+    -fx-fill: #cdd6f4;
+}
+
+/* Line number gutter */
+.mermaid-code-area .lineno {
+    -fx-font-size: 12px;
+    -fx-fill: #585b70;
+    -fx-background-color: #181825;
+}
+
+.mermaid-code-area .paragraph-box:has-caret {
+    -fx-background-color: #2a2b3d;
+}
+
+/* ── Syntax highlighting style classes ──────────────────────── */
+
+/* Diagram type keywords: flowchart, classDiagram, etc. */
+.keyword {
+    -fx-fill: #cba6f7;
+    -fx-font-weight: bold;
+}
+
+/* Structural keywords: subgraph, end, participant, class, etc. */
+.structure {
+    -fx-fill: #89b4fa;
+    -fx-font-weight: bold;
+}
+
+/* Direction keywords: TD, LR, RL, BT */
+.direction {
+    -fx-fill: #f9e2af;
+    -fx-font-weight: bold;
+}
+
+/* Arrows and relation symbols: -->, -.-> etc. */
+.arrow {
+    -fx-fill: #f38ba8;
+}
+
+/* String literals in quotes */
+.string {
+    -fx-fill: #a6e3a1;
+}
+
+/* Comments: %% ... */
+.comment {
+    -fx-fill: #6c7086;
+    -fx-font-style: italic;
+}
+
+/* Numeric values */
+.number {
+    -fx-fill: #fab387;
+}
+
+/* ── Caret and selection ───────────────────────────────────── */
+
+.mermaid-code-area .caret {
+    -fx-stroke: #f5e0dc;
+}
+
+.mermaid-code-area .selection {
+    -fx-fill: #45475a;
+}
+
+/* ── ScrollBar styling ─────────────────────────────────────── */
+
+.mermaid-code-area .scroll-bar:vertical .thumb,
+.mermaid-code-area .scroll-bar:horizontal .thumb {
+    -fx-background-color: #45475a;
+}
+
+.mermaid-code-area .scroll-bar:vertical .track,
+.mermaid-code-area .scroll-bar:horizontal .track {
+    -fx-background-color: #1e1e2e;
+}
