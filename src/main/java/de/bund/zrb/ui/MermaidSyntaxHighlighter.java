@@ -18,14 +18,14 @@ public final class MermaidSyntaxHighlighter {
 
     // Language keywords (diagram type declarations)
     private static final String KEYWORD_PATTERN =
-            "\\b(flowchart|graph|sequenceDiagram|classDiagram|stateDiagram-v2|stateDiagram|erDiagram"
+            "\\b(?:flowchart|graph|sequenceDiagram|classDiagram|stateDiagram-v2|stateDiagram|erDiagram"
                     + "|pie|gantt|journey|mindmap|gitGraph|sankey-beta|block-beta|architecture-beta"
                     + "|C4Context|C4Container|C4Component|C4Dynamic|C4Deployment"
                     + "|requirementDiagram|timeline)\\b";
 
     // Sub-keywords / structural
     private static final String STRUCTURE_PATTERN =
-            "\\b(subgraph|end|participant|actor|activate|deactivate|loop|alt|else|opt|par|critical"
+            "\\b(?:subgraph|end|participant|actor|activate|deactivate|loop|alt|else|opt|par|critical"
                     + "|break|rect|note|Note|over|right of|left of|class|section|title|dateFormat"
                     + "|commit|branch|checkout|merge|cherry-pick|state"
                     + "|requirement|functionalRequirement|interfaceRequirement|performanceRequirement"
@@ -35,29 +35,42 @@ public final class MermaidSyntaxHighlighter {
 
     // Direction keywords
     private static final String DIRECTION_PATTERN =
-            "\\b(TD|TB|BT|LR|RL)\\b";
+            "\\b(?:TD|TB|BT|LR|RL)\\b";
 
-    // Arrows and relation symbols
+    // Arrows and relation symbols — every ) and | must be escaped with \\
     private static final String ARROW_PATTERN =
-            "(-->|---->|-.->|-\\.->|==>|--[>ox]|\\.\\.[>ox]|--\\|>|\\.\\.\\|>|--\\*|--o"
-                    + "|<-->|<-.->|<-\\.->|<==>"
-                    + "|->>|-->>|-)\\)|--\\)"
-                    + "|\\|\\|--o\\{|\\}\\|--\\|\\{|\\|\\|--\\|\\{|\\}o--o\\{|\\|o--o\\|"
-                    + "|-->|---|-\\.-|===)";
+            "(?:"
+                    + "---->+"              // long arrows: ----> etc.
+                    + "|-->>+"             // dotted sequence arrow: -->>
+                    + "|-\\.->+"           // dotted arrow: -.->
+                    + "|--\\|>"            // class inheritance: --|>
+                    + "|\\.\\. *\\|>"      // class implementation: ..|>
+                    + "|--\\*"             // composition: --*
+                    + "|--\\)"             // async dotted: --)
+                    + "|-\\)"              // async: -)
+                    + "|<=+>"              // thick bidirectional: <==>
+                    + "|<--+>"             // bidirectional: <-->
+                    + "|=+>"               // thick arrow: ==>
+                    + "|->>+"              // solid sequence arrow: ->>
+                    + "|-->+"              // standard arrow: -->
+                    + "|\\.\\. *>"         // dependency: ..>
+                    + "|--o\\b"            // aggregation: --o
+                    + "|--x\\b"            // cross end: --x
+                    + "|---+"              // open link: ---
+                    + "|-\\.-+"            // dotted line: -.-
+                    + "|===+"              // thick line: ===
+                    + ")";
 
     // Strings in quotes
-    private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
+    private static final String STRING_PATTERN = "\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"";
 
     // Comments
     private static final String COMMENT_PATTERN = "%%[^\n]*";
 
-    // Labels in brackets/parens:  [text], (text), {text}, ((text)), etc.
-    private static final String LABEL_PATTERN = "\\[([^\\]]+)\\]|\\(([^)]+)\\)|\\{([^}]+)\\}";
-
     // Numeric values (for pie, gantt, etc.)
-    private static final String NUMBER_PATTERN = "\\b\\d+(\\.\\d+)?\\b";
+    private static final String NUMBER_PATTERN = "\\b\\d+(?:\\.\\d+)?\\b";
 
-    // Combined pattern
+    // Combined pattern — order matters: comments and strings first (greedy)
     private static final Pattern PATTERN = Pattern.compile(
             "(?<COMMENT>" + COMMENT_PATTERN + ")"
                     + "|(?<STRING>" + STRING_PATTERN + ")"

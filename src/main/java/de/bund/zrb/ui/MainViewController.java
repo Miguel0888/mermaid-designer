@@ -21,6 +21,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.reactfx.Subscription;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -55,7 +56,12 @@ public class MainViewController {
     private final Label statusLabel;
     private final Label typeLabel;
 
+    // ── State ───────────────────────────────────────────────────
     private boolean suppressEditorSync = false;
+    /** Kept alive to prevent GC of the ReactFX event-stream chain. */
+    private Subscription textChangeSubscription;
+    /** Monotonic counter so stale async renders don't overwrite newer results. */
+    private long renderVersion = 0;
 
     public MainViewController(Stage stage) {
         this.stage = stage;
@@ -92,7 +98,8 @@ public class MainViewController {
         wirePreviewEvents();
         wireKeyboardShortcuts(scene);
 
-        // Initial render
+        // Push template text into the editor and render initial preview
+        syncEditorFromDocument();
         triggerPreviewUpdate();
     }
 
@@ -169,8 +176,9 @@ public class MainViewController {
     // ════════════════════════════════════════════════════════════
 
     private void wireEditorEvents() {
-        // Debounced text change → update document & preview
-        codeEditor.onTextChanged(500, newText -> {
+        // Debounced text change → update document & preview.
+        // MUST store the subscription to prevent GC of the ReactFX stream chain.
+        textChangeSubscription = codeEditor.onTextChanged(500, newText -> {
             if (suppressEditorSync) return;
             document.updateSource(newText);
             triggerPreviewUpdate();
@@ -412,9 +420,13 @@ public class MainViewController {
         }
 
         setStatus("Rendering…");
+        final long thisRender = ++renderVersion;
 
         CompletableFuture.supplyAsync(() -> previewService.renderDetailed(source))
                 .thenAcceptAsync(result -> {
+                    // Discard stale results — a newer render is already in flight
+                    if (thisRender != renderVersion) return;
+
                     if (result.success()) {
                         previewPane.showSvg(result.svg());
                         setStatus("✓ Vorschau aktualisiert — " + document.getDiagramType().getDisplayName());
@@ -423,7 +435,17 @@ public class MainViewController {
                         setStatus("✗ Render-Fehler");
                     }
                     updateStatusBar();
-                }, Platform::runLater);
+                }, Platform::runLater)
+                .exceptionally(ex -> {
+                    LOG.log(Level.WARNING, "Preview render failed", ex);
+                    Platform.runLater(() -> {
+                        if (thisRender == renderVersion) {
+                            previewPane.showError("Rendering-Ausnahme: " + ex.getMessage());
+                            setStatus("✗ Render-Ausnahme");
+                        }
+                    });
+                    return null;
+                });
     }
 
     // ════════════════════════════════════════════════════════════

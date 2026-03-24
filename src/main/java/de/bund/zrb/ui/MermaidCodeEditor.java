@@ -114,8 +114,9 @@ public class MermaidCodeEditor extends StackPane {
         if (text.isEmpty()) return;
         try {
             codeArea.setStyleSpans(0, MermaidSyntaxHighlighter.computeHighlighting(text));
-        } catch (Exception e) {
-            // Ignore highlighting errors gracefully
+        } catch (Throwable e) {
+            // Ignore highlighting errors gracefully — never crash the editor
+            System.err.println("[Highlighting] " + e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 }
